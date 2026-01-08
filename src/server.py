@@ -1,4 +1,5 @@
 import socket
+from src.http_request import HTTPRequest
 
 class Server:
     def __init__(self, host='127.0.0.1', port=8080):
@@ -16,7 +17,7 @@ class Server:
             print(f"Successfully using address {self.host}, and port {self.port}")
 
         except Exception as e:
-            print(f"Error using connecting to port{self.port}")
+            print(f"Error using connecting to port{self.port}. Error: {e}")
             return
         
         self.server_socket.listen(5)
@@ -32,8 +33,18 @@ class Server:
                 client_socket.close()
                 continue
 
-            print(f"The raw request from {client_address}: ")
-            print(raw_request.decode('utf-8'))
+            request = HTTPRequest(raw_request)
+
+            print(f"The request from {client_address}: ")
+            print(f"Method: {request.method}")
+            print(f"Path: {request.path}")
+            print(f"Language version: {request.language_version}")
+            print(f"Headers: {len(request.headers)}")
+
+            response = "HTTP/1.1 200 OK\r\n\r\nSuccessful Connection"
+            client_socket.sendall(response.encode('utf-8'))
+            client_socket.close()
+
 
 if __name__ == "__main__":
     server = Server()
