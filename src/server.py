@@ -56,7 +56,7 @@ class Server:
 
                 if os.path.exists(file_path):
                     with open (file_path, 'r') as f:
-                        content = f.read
+                        content = f.read()
                     response.status_code = 200
                     response.set_body(content)
                 
