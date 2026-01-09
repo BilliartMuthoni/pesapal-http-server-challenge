@@ -40,45 +40,59 @@ class Server:
 
             request = HTTPRequest(raw_request)
 
-            print(f"The request from {client_address}: ")
-            print(f"Method: {request.method}")
-            print(f"Path: {request.path}")
-            print(f"Language version: {request.language_version}")
-            print(f"Headers: {len(request.headers)}")
+            #POST REQUESTS
+            if request.method == "POST":
+                response = HTTPResponse()
+                response.set_header("Server", "Server/1.0")
 
+                if request.path == "/signup":
+                    print(f"SIGNUP DATA: {request.body}")
+                    response.set_body("<h1>Registration Successful</h1>")
+                elif request.path == "/login":
+                    print(f"LOGIN DATA: {request.body}")
+                    response.set_body("<h1>Login Successful</h1>")
+
+                response.send(client_socket)
+                client_socket.close()
+                continue
+
+            # GET REQUESTS
             response = HTTPResponse()
-
             response.set_header("Server", "Server/1.0")
-            response.set_header("Content-Type", "text/html")
-            
+                        
             if request.path == "/" or request.path == "/index":
                 file_path = os.path.join(template_folder, "index.html")
+                content_type = "text/html"
 
-                if os.path.exists(file_path):
-                    with open (file_path, 'r') as f:
-                        content = f.read()
-                    response.status_code = 200
-                    response.set_body(content)
-                
+            elif request.path == "/login":
+                file_path = os.path.join(template_folder, "login.html")
+                content_type = "text/html"
+
+            elif request.path == "/signup":
+                file_path = os.path.join(template_folder, "signup.html")
+                content_type = "text/html"
+
+            else:
+                file_path = request.path.lstrip("/")
+                if file_path.endswith(".css"):
+                    content_type = "text/css"
+                elif file_path.endswith(".html"):
+                    content_type = "text/html"
+                elif file_path.endswith(".png"):
+                    content_type = "image/png"
                 else:
-                    response.status_code = 404
-                    response.set_body("<h1>404-Template Missing</h1>")
-            
-            elif request.path == "/css_styles/style.css":
-                file_path = "css_styles/style.css"
-                if os.path.exists(file_path):
-                    with open(file_path, 'r') as f:
-                        content = f.read()
-                    response.status_code = 200
-                    response.set_header("Content-Type", "text/css")
-                    response.set_body(content)
+                    content_type = "text/plain"
+
+            if os.path.exists(file_path):
+                with open (file_path, 'rb') as f:
+                    content = f.read()
+                response.status_code = 200
+                response.set_header("Content-Type", content_type)
+                response.set_body(content)
                 
-                else:
-                    response.status_code = 404
-                    response.set_body("")
             else:
                 response.status_code = 404
-                response.set_body("<h1>404-Page Not Found</h1>")
+                response.set_body("<h1>404-Template Missing</h1>")
 
             response.send(client_socket)
             client_socket.close()

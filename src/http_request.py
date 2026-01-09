@@ -11,12 +11,14 @@ class HTTPRequest:
         self.process_data()
 
     def process_data(self):
+        header_section = ""
+        self.body = ""
+
         try:
             if '\r\n\r\n' in self.raw_text:
                 header_section, self.body = self.raw_text.split('\r\n\r\n', 1)
             else:
                 header_section = self.raw_text
-                self.body = ""
 
             lines = header_section.split('\r\n')
 
