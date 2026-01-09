@@ -1,5 +1,6 @@
 import socket
 from src.http_request import HTTPRequest
+from src.http_response import HTTPResponse
 
 class Server:
     def __init__(self, host='127.0.0.1', port=8080):
@@ -41,8 +42,13 @@ class Server:
             print(f"Language version: {request.language_version}")
             print(f"Headers: {len(request.headers)}")
 
-            response = "HTTP/1.1 200 OK\r\n\r\nSuccessful Connection"
-            client_socket.sendall(response.encode('utf-8'))
+            response = HTTPResponse()
+
+            response.set_header("Server", "Server/1.0")
+            response.set_header("Content-Type", "text/html")
+            response.set_body("Success")
+
+            response.send(client_socket)
             client_socket.close()
 
 
