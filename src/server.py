@@ -1,6 +1,10 @@
 import socket
+import os 
+
 from src.http_request import HTTPRequest
 from src.http_response import HTTPResponse
+
+template_folder = "frontend_template"
 
 class Server:
     def __init__(self, host='127.0.0.1', port=8080):
@@ -46,7 +50,23 @@ class Server:
 
             response.set_header("Server", "Server/1.0")
             response.set_header("Content-Type", "text/html")
-            response.set_body("Success")
+            
+            if request.path == "/" or request.path == "/index":
+                file_path = os.path.join(template_folder, "index.html")
+
+                if os.path.exists(file_path):
+                    with open (file_path, 'r') as f:
+                        content = f.read
+                    response.status_code = 200
+                    response.set_body(content)
+                
+                else:
+                    response.status_code = 404
+                    response.set_body("<h1>404-Template Missing</h1>")
+            
+            else:
+                response.status_code = 404
+                response.set_body("<h1>404-Page Not Found</h1>")
 
             response.send(client_socket)
             client_socket.close()
