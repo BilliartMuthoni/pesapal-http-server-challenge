@@ -64,13 +64,24 @@ class Server:
                     response.status_code = 404
                     response.set_body("<h1>404-Template Missing</h1>")
             
+            elif request.path == "/css_styles/style.css":
+                file_path = "css_styles/style.css"
+                if os.path.exists(file_path):
+                    with open(file_path, 'r') as f:
+                        content = f.read()
+                    response.status_code = 200
+                    response.set_header("Content-Type", "text/css")
+                    response.set_body(content)
+                
+                else:
+                    response.status_code = 404
+                    response.set_body("")
             else:
                 response.status_code = 404
                 response.set_body("<h1>404-Page Not Found</h1>")
 
             response.send(client_socket)
             client_socket.close()
-
 
 if __name__ == "__main__":
     server = Server()
