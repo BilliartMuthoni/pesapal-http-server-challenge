@@ -14,7 +14,6 @@ class Server:
 
     def start_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         try:
@@ -33,7 +32,6 @@ class Server:
             print(f"The {client_address}, has connected")
 
             raw_request = client_socket.recv(1024)
-
             if not raw_request:
                 client_socket.close()
                 continue
@@ -45,12 +43,23 @@ class Server:
                 response = HTTPResponse()
                 response.set_header("Server", "Server/1.0")
 
+                form_data = request.get_body_parameters()
+
                 if request.path == "/signup":
-                    print(f"SIGNUP DATA: {request.body}")
-                    response.set_body("<h1>Registration Successful</h1>")
+                    username = form_data.get("username")
+                    password = form_data.get("new_password")
+                    confirm  = form_data.get("confirm_password")
+
+                    if password == confirm:
+                        print(f"SUCCESS: {username} registered.")
+                        response.set_body(f"Welcome, {username}")
+                    else:
+                        response.set_body("Passwords do not match")
+
                 elif request.path == "/login":
-                    print(f"LOGIN DATA: {request.body}")
-                    response.set_body("<h1>Login Successful</h1>")
+                    username = form_data.get("username")
+                    print(f"LOGIN: {username}")
+                    response.set_body(f"Login Successful, Welcome back {username}")
 
                 response.send(client_socket)
                 client_socket.close()
@@ -92,7 +101,7 @@ class Server:
                 
             else:
                 response.status_code = 404
-                response.set_body("<h1>404-Template Missing</h1>")
+                response.set_body("404-Page Missing")
 
             response.send(client_socket)
             client_socket.close()

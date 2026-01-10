@@ -1,3 +1,5 @@
+import urllib.parse
+
 class HTTPRequest:
     def __init__(self, raw_data):
         self.raw_text = raw_data.decode('utf-8', errors='ignore')
@@ -47,5 +49,26 @@ class HTTPRequest:
         except Exception as e:
             print(f"Error: {e}")
     
+    # to make messy text from the form and make it more readable
+    def get_body_parameters(self):
+        captured_data = {}
+
+        if not self.body:
+            return captured_data
+        
+        #breaking string 
+        form_fields = self.body.split('&')
+
+        for field in form_fields:
+            if '=' in field:
+                #split key and value
+                key, raw_value = field.split('=', 1)
+
+                #clean into understandable text
+                clean_value = urllib.parse.unquote_plus(raw_value)
+                captured_data[key] = clean_value
+
+        return captured_data  
+         
     def __str__(self):
         return f"<HTTPRequest Method={self.method}, Path={self.path}, Headers={len(self.headers)}>"
