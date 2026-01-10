@@ -6,6 +6,24 @@ from src.http_response import HTTPResponse
 
 template_folder = "frontend_template"
 
+def save_user_to_database(username, password):
+    with open("users.txt", "a") as database:
+        database.write(f"{username}:{password}\n")
+    print(f"Saved user {username} into the database")
+
+def check_login_credentials(username, password):
+    if not os.path.exists("users.txt"):
+        return False
+    
+    with open("users.txt", "r") as database:
+        for line in database:
+            stored_user, stored_pass = line.strip().split(":")
+            if username == stored_user and password == stored_pass:
+                return True
+            
+    return False
+
+
 class Server:
     def __init__(self, host='127.0.0.1', port=8080):
         self.host = host
@@ -51,16 +69,24 @@ class Server:
                     confirm  = form_data.get("confirm_password")
 
                     if password == confirm:
-                        print(f"SUCCESS: {username} registered.")
+                        save_user_to_database(username, password)
+                        print(f"Success: {username} registered.")
                         response.set_body(f"Welcome, {username}")
                     else:
                         response.set_body("Passwords do not match")
 
                 elif request.path == "/login":
                     username = form_data.get("username")
-                    print(f"LOGIN: {username}")
-                    response.set_body(f"Login Successful, Welcome back {username}")
+                    password = form_data.get("password")
 
+                    if check_login_credentials(username, password):
+                        print(f"Successful login: {username}")
+                        response.set_body(f"Login Successful, Welcome back {username}")
+
+                    else:
+                        print(f"Login Failed: Invalid Credentials fo {username}")
+                        response.set_body("Login Failed. Invalid username or password.")
+                        
                 response.send(client_socket)
                 client_socket.close()
                 continue
