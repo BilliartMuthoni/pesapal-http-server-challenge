@@ -49,13 +49,28 @@ class Server:
             client_socket, client_address = self.server_socket.accept()
             print(f"The {client_address}, has connected")
 
-            raw_request = client_socket.recv(1024)
+            raw_request = client_socket.recv(4096)
             if not raw_request:
                 client_socket.close()
                 continue
 
             request = HTTPRequest(raw_request)
 
+            if request.content_length > len(request.body):
+                remaining_bytes = request.content_length - len(request.body)
+
+                while remaining_bytes > 0:
+                    chunk = client_socket.recv(min(remaining_bytes, 4096))
+                    if not chunk:
+                        break
+
+                    request.body += chunk.decode('utf-8', errors='ignore')
+                    remaining_bytes -= len(chunk)
+            
+            print(f"Path: {request.path}")
+            print(f"Content-Type: {request.content_type}")
+            print(f"Body Size: {len(request.body)} bytes")
+            
             #POST REQUESTS
             if request.method == "POST":
                 response = HTTPResponse()

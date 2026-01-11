@@ -8,6 +8,9 @@ class HTTPRequest:
         self.path = ""
         self.language_version = ""
         self.headers = {}
+        self.useragent = ""
+        self.content_type = ""
+        self.content_length = 0
         self.body = ""
 
         self.process_data()
@@ -43,8 +46,26 @@ class HTTPRequest:
 
                     if ':' in line:
                         key, value = line.split(':', 1)
-                    
                         self.headers[key.strip().lower()] = value.strip()
+
+                #identifying host and user-agent
+                self.host = self.headers.get('host', 'Unknown')
+                self.useragent = self.headers.get('user-agent', 'Uknown')
+                
+                #identify content type
+                self.content_type = self.headers.get('content-type', 'text/plain')
+
+                #identify content length
+                contentlength_value = self.headers.get('content-length', '0')
+
+                #check if content length is a number and convert into integer
+                self.content_length = int(contentlength_value) if contentlength_value.isdigit() else 0
+
+                #if content type is missing cut off to prevent memory
+                if 'content-type' not in self.headers:
+                    upper_bound = 8192
+                    if len(self.body) > upper_bound:
+                        self.body = self.body[:upper_bound]
 
         except Exception as e:
             print(f"Error: {e}")

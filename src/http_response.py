@@ -1,33 +1,45 @@
 class HTTPResponse:
-    def __init__(self):
-        self.status_code = 200
-        self.headers = {} 
-        self.body = ""
+    def __init__(self, status_code=200, status_message="OK"):
+        self.status_code = status_code
+        self.status_message = status_message
+        self.headers = {
+            "Content-Type": "text/html",
+            "Connection": "close"
+        } 
+        self.body = b""
 
     def set_header(self, key, value):
         self.headers[key] = value
 
     def set_body(self, data):
-        self.body = data
+        #set body and ensure it is on bytes
+        if isinstance(data, str):
+            self.body = data.encode('utf-8')
+        else:
+            self.body = data
+
+    def response(self):
+        #calculate content length
+        self.headers["Content-Length"] = str(len(self.body))
+
+        response_string = f"HTTP/1.1 {self.status_code} {self.status_message}\r\n"
+
+        #headers
+        header_section = ""
+        for key, value in self.headers.items():
+            header_section += f"{key}: {value}\r\n"
+
+        final_response = response_string.encode('utf-8')
+        final_response += header_section.encode('utf-8')
+        final_response += b"\r\n"  
+        final_response += self.body
+
+        return final_response
+
 
     def send(self, client_socket):
-        status_messages = {200: "OK", 404: "Not Found", 403: "Forbidden"}
-        msg = status_messages.get(self.status_code, "OK")
-
-        body_bytes = self.body.encode('utf-8') if isinstance(self.body, str) else self.body
-        self.set_header("Content-Length", len(body_bytes))
-
-        response_string = f"HTTP/1.1 {self.status_code} {msg}\r\n"
-
-        for key, value in self.headers.items():
-            response_string += f"{key}: {value}\r\n"
-
-        response_string += "\r\n"
-
-        final_response = response_string.encode('utf-8') + body_bytes
-
         try:
-            client_socket.sendall(final_response)
+            client_socket.sendall(self.response())
             print("Successful response")
         
         except Exception as e:
