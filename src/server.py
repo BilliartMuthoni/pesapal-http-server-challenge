@@ -92,7 +92,12 @@ class Server:
                     if password == confirm:
                         save_user_to_database(username, password)
                         print(f"Success: {username} registered.")
-                        response.set_body(f"Welcome, {username}")
+
+                        file_path = os.path.join(template_folder, "index.html")
+                        with open(file_path, 'rb') as f:
+                            content = f.read()
+                        response.set_header("Content-Type", "text/html")
+                        response.set_body(content)
                     else:
                         response.set_body("Passwords do not match")
 
@@ -102,7 +107,12 @@ class Server:
 
                     if check_login_credentials(username, password):
                         print(f"Successful login: {username}")
-                        response.set_body(f"Login Successful, Welcome back {username}")
+                        
+                        file_path = os.path.join(template_folder, "index.html")
+                        with open(file_path, 'rb') as f:
+                            content = f.read()
+                        response.set_header("Content-Type", "text/html")
+                        response.set_body(content)
 
                     else:
                         print(f"Login Failed: Invalid Credentials fo {username}")

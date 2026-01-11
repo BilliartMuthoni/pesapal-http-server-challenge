@@ -4,17 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Quicksand:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css_styles/style.css">
 </head>
 <body class="cafe-theme">
     <div class="form-container">
         <h2 class = "gold-text">Login to your Account</h2>
         <form action="/login" method="POST">
-            <label class = "beige-text">Username:</label>
-            <input type="text" name="username" required>
-
-            <label class = "beige-text">Password:</label>
-            <input type="password" name="password" required>
+            <input type="text" name="username" placeholder="Enter your Username" required>
+            <input type="password" name="password" placeholder="Enter your Password" required>
             <button type="submit">Login</button>
         </form>
         <p class="beige-text">New here? <a href="/signup" class="gold-link">Sign up</a></p>
