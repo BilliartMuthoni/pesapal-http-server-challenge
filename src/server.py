@@ -66,6 +66,12 @@ class Server:
 
                     request.body += chunk.decode('utf-8', errors='ignore')
                     remaining_bytes -= len(chunk)
+
+            if not request.content_type:
+                upper_bound = 8192
+                if len(request.body) > upper_bound:
+                    print(f"Removed chunk to {upper_bound} bytes")
+                    request.body = request.body[:upper_bound]
             
             print(f"Path: {request.path}")
             print(f"Content-Type: {request.content_type}")
